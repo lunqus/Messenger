@@ -1,11 +1,23 @@
 import javax.swing.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.io.IOException;
+import java.net.UnknownHostException;
 
 public class Login {
 
     static void startChat(JFrame login, String loginName) {
-        System.out.println(loginName);
+        // System.out.println(loginName);
+
+        try {
+            ChatClient client = new ChatClient(loginName);
+            login.setVisible(false);
+            login.dispose();
+        } catch (UnknownHostException e ) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
     }
 

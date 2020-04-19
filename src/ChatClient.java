@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-public class ChatClient extends JFrame implements Runnable{
+public class ChatClient extends JFrame implements Runnable {
 
     String loginName;
 

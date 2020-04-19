@@ -67,11 +67,7 @@ public class ChatServer {
                      switch (msgType) {
                          case "LOGIN":
                              clientSockets.forEach(socket -> {
-                                 try {
-                                     notifyLogin(socket, name);
-                                 } catch (IOException e) {
-                                     e.printStackTrace();
-                                 }
+                                 notifyLogin(socket, name);
                              });
                      }
 
@@ -88,7 +84,7 @@ public class ChatServer {
         new ChatServer();
     }
 
-    private void notifyLogin(Socket socket, String name) throws IOException {
+    private void notifyLogin(Socket socket, String name) {
 
         try {
             DataOutputStream out = new DataOutputStream(socket.getOutputStream());

@@ -31,6 +31,9 @@ public class ChatServer {
         DataInputStream in;
         DataOutputStream out;
 
+        int pos = 0;
+        int i = 0;
+
          Client(Socket client) throws IOException {
             clientSocket = client;
             in = new DataInputStream(clientSocket.getInputStream());
@@ -50,7 +53,7 @@ public class ChatServer {
              while(true) {
                  try {
                      String msgFromCLIENT = in.readUTF();
-                     // System.out.println(msgFromCLIENT);
+
                      StringTokenizer msgParts = new StringTokenizer(msgFromCLIENT);
 
                      String name = msgParts.nextToken();
@@ -61,15 +64,32 @@ public class ChatServer {
                      while(msgParts.hasMoreTokens())
                          messageBuffer.append(" " + msgParts.nextToken());
 
-                     String message = messageBuffer.toString();
-                     // System.out.println(message);
+                     final String message = messageBuffer.toString();
+
 
                      switch (msgType) {
                          case "LOGIN":
                              clientSockets.forEach(socket -> {
                                  notifyLogin(socket, name);
                              });
+                             break;
+                         case "LOGOUT":
+                             clientSockets.forEach(socket -> {
+                                 performLogout(socket,name);
+                                 if(name.equals(loginNames.get(i++)))
+                                     pos = i-1;
+                             });
+                             loginNames.remove(pos);
+                             clientSockets.remove(pos);
+                             break;
+                         default:
+                             clientSockets.forEach(socket -> {
+                                 notifyMessage(socket, name, message);
+                             });
                      }
+
+                     if(msgType.equals("LOGOUT"))
+                         break;
 
                  } catch (IOException e) {
                      e.printStackTrace();
@@ -80,8 +100,29 @@ public class ChatServer {
 
     }
 
+
     public static void main(String[] args) throws IOException {
         new ChatServer();
+    }
+
+    private void performLogout(Socket socket, String name) {
+
+        try {
+            DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+            out.writeUTF(name + " has logged out");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void notifyMessage(Socket socket, String name, String message) {
+
+        try {
+            DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+            out.writeUTF(name + ": " + message);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void notifyLogin(Socket socket, String name) {

@@ -1,6 +1,8 @@
 import org.w3c.dom.Text;
 
 import javax.swing.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.DataInputStream;
@@ -22,6 +24,30 @@ public class ChatClient extends JFrame implements Runnable {
     DataInputStream in;
     DataOutputStream out;
 
+    private void logout() {
+
+        try {
+            out.writeUTF(loginName + " LOGOUT ");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        System.exit(1);
+    }
+
+    private void send() {
+
+        try {
+            if(sendMessage.getText().length() > 0)
+                out.writeUTF(loginName + " DATA " + sendMessage.getText());
+
+            sendMessage.setText("");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public ChatClient(String loginName) throws UnknownHostException, IOException {
         super(loginName);
         this.loginName = loginName;
@@ -29,7 +55,7 @@ public class ChatClient extends JFrame implements Runnable {
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                // super.windowClosing(e);
+                logout();
             }
         });
 
@@ -37,31 +63,33 @@ public class ChatClient extends JFrame implements Runnable {
         messages.setEditable(false);
         sendMessage = new JTextField(50);
 
+        sendMessage.addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+
+            }
+
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if(e.getKeyCode() == KeyEvent.VK_ENTER)
+                    send();
+            }
+
+            @Override
+            public void keyReleased(KeyEvent e) {
+
+            }
+        });
+
         send = new JButton("Send");
         logout = new JButton("Logout");
 
         send.addActionListener(event -> {
-            try {
-                if(sendMessage.getText().length() > 0)
-                    out.writeUTF(loginName + " DATA " + sendMessage.getText());
-
-                sendMessage.setText("");
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            send();
         });
 
         logout.addActionListener(event -> {
-            try {
-                if(sendMessage.getText().length() > 0)
-                    out.writeUTF(loginName + " LOGOUT ");
-
-                System.exit(1);
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            logout();
         });
 
         Socket socket = new Socket("127.0.0.1", 5217);
